@@ -2395,7 +2395,7 @@ function main() {
                 }
             }
             else { // Otherwise, just build and test
-                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile}`);
+                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=Release`);
             }
             core.info("✅ complete");
         }
