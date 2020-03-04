@@ -12,7 +12,7 @@ inputs:
     required: false
   SOLUTION_FILE:  
     description: 'The .sln file to be built'
-    required: false 
+    required: true 
   DEPLOY_TO:  
     description: 'If set, Octopus will attempt to auomtatically deploy to this environment'
     required: false

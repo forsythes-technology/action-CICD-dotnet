@@ -8,7 +8,7 @@ async function main() {
 		const createReleaseInput: string = core.getInput("CREATE_RELEASE", { required: true });
 		const octopusUrl: string = core.getInput("OCTOPUS_URL", { required: false });
 		const octopusApiKey: string = core.getInput("OCTOPUS_APIKEY", { required: false });
-		const solutionFile = core.getInput("SOLUTION_FILE", { required: false });
+		const solutionFile = core.getInput("SOLUTION_FILE", { required: true });
 		const project: string = core.getInput("PROJECT", { required: false });
 		const deployTo: string = core.getInput("DEPLOY_TO", { required: false });
 		const msTeamsWebhook: string = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
@@ -23,13 +23,13 @@ async function main() {
 		if (context.ref.indexOf("refs/tags/") === -1) {
 			throw new Error("Unable to get a version number");
 		}
-		const version = context.ref.replace("refs/tags/", "");
-		core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
 		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("NuGet Restore...");
 		await exec(`nuget restore`);
 		core.info("Building...");
 		if (createRelease) { // Build, pack and release
+			const version = context.ref.replace("refs/tags/", "");
+			core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
 			await exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=Release /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
 			core.info("Installing octopus cli...");
 			await exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
