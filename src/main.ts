@@ -19,15 +19,13 @@ async function main() {
 		if (createRelease && (!octopusUrl || !octopusApiKey)) {
 			throw new Error("Cannot create a release without OCTOPUS_URL and OCTOPUS_APIKEY being defined");
 		}
-
-		if (context.ref.indexOf("refs/tags/") === -1) {
-			throw new Error("Unable to get a version number");
-		}
-		core.info(`Building solution (ref: ${context.ref})...`);
 		core.info("NuGet Restore...");
 		await exec(`nuget restore`);
-		core.info("Building...");
+		core.info(`Building solution (ref: ${context.ref})...`);
 		if (createRelease) { // Build, pack and release
+			if (context.ref.indexOf("refs/tags/") === -1) {
+				throw new Error("Unable to get a version number");
+			}
 			const version = context.ref.replace("refs/tags/", "");
 			core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
 			await exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=Release /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
@@ -39,7 +37,7 @@ async function main() {
 			if (msTeamsWebhook) {
 				sendTeamsNotification(projectName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
 			}
-		} else { // Otherwise, just build
+		} else { // Otherwise, just build and test
 			await exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile}`);
 
 		}
