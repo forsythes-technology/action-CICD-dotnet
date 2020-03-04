@@ -2361,33 +2361,42 @@ const github = __importStar(__webpack_require__(469));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const octopusUrl = core.getInput("OCTOPUS_URL", { required: true });
-            const octopusApiKey = core.getInput("OCTOPUS_APIKEY", { required: true });
-            const solutionFile = core.getInput("SOLUTION_FILE", { required: true });
+            const createReleaseInput = core.getInput("CREATE_RELEASE", { required: true });
+            const octopusUrl = core.getInput("OCTOPUS_URL", { required: false });
+            const octopusApiKey = core.getInput("OCTOPUS_APIKEY", { required: false });
+            const solutionFile = core.getInput("SOLUTION_FILE", { required: false });
             const project = core.getInput("PROJECT", { required: false });
             const deployTo = core.getInput("DEPLOY_TO", { required: false });
             const msTeamsWebhook = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
             const context = github.context;
             const repo = context.repo.repo;
             const projectName = project ? project : repo;
+            const createRelease = (createReleaseInput.toLowerCase() === "true");
+            if (createRelease && (!octopusUrl || !octopusApiKey)) {
+                throw new Error("Cannot create a release without OCTOPUS_URL and OCTOPUS_APIKEY being defined");
+            }
             if (context.ref.indexOf("refs/tags/") === -1) {
                 throw new Error("Unable to get a version number");
             }
             const version = context.ref.replace("refs/tags/", "");
             core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
-            core.info("Installing octopus cli...");
-            yield exec_1.exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
             core.info(`Building solution (ref: ${context.ref})...`);
             core.info("NuGet Restore...");
             yield exec_1.exec(`nuget restore`);
             core.info("Building...");
-            yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=Release /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
-            core.info(`✅ complete`);
-            core.info("Creating Release...");
-            const deployToString = deployTo ? `--deployTo=${deployTo}` : "";
-            yield exec_1.exec(`.\\dotnet-octo create-release --project=${projectName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey} ${deployToString}`);
-            if (msTeamsWebhook) {
-                sendTeamsNotification(projectName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
+            if (createRelease) { // Build, pack and release
+                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=Release /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
+                core.info("Installing octopus cli...");
+                yield exec_1.exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
+                core.info("Creating Release...");
+                const deployToString = deployTo ? `--deployTo=${deployTo}` : "";
+                yield exec_1.exec(`.\\dotnet-octo create-release --project=${projectName} --version=${version} --server=${octopusUrl} --apiKey=${octopusApiKey} ${deployToString}`);
+                if (msTeamsWebhook) {
+                    sendTeamsNotification(projectName, `✔ Version ${version} Deployed to Octopus`, msTeamsWebhook);
+                }
+            }
+            else { // Otherwise, just build
+                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile}`);
             }
             core.info("✅ complete");
         }
