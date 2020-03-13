@@ -16,7 +16,7 @@ async function main() {
 		const msTeamsWebhook: string = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
 		const context = github.context;
 		const repo = context.repo.repo;
-		const configuration = configurationInput || "Release";
+		const configuration = configurationInput ? configurationInput : "Release";
 		const projectName = project ? project : repo;
 		const createRelease = (createReleaseInput.toLowerCase() === "true");
 		if (createRelease && (!octopusUrl || !octopusApiKey)) {
