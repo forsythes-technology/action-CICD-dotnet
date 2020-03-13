@@ -16,6 +16,12 @@ inputs:
   DEPLOY_TO:  
     description: 'If set, Octopus will attempt to auomtatically deploy to this environment'
     required: false
+  PROJECT:  
+    description: 'The Octopus project to deploy to, if omitted repo name is used instead'
+    required: false
+  CONFIGURATION:  
+    description: 'The build configuration to use, if unset, defaults to RELEASE'
+    required: false
   MS_TEAMS_WEBHOOK:  
     description: 'If set, A MS Teams notification will be sent to this webhook'
     required: false
