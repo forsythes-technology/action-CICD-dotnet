@@ -15,5 +15,8 @@ This action creates an Octopus Release given a DotNet Framework solution.
         OCTOPUS_APIKEY: ${{secrets.OCTOPUS_APIKEY}} # Optional
 		DEPLOY_TO: Staging # Optional, if included the release will be deployed to this environment automatically
         PROJECT: Example-Project # Optional, if omitted repo name is used instead
+		CONFIGURATION: Release # Optional, the configuration to use when building the solution if unset, defaults to Release.
+    description: 'The build configuration to use, if unset, defaults to RELEASE'
+    required: false
         MS_TEAMS_WEBHOOK: <webhook_url> # Optional
 ```
