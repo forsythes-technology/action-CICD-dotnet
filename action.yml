@@ -13,6 +13,9 @@ inputs:
   SOLUTION_FILE:  
     description: 'The .sln file to be built'
     required: true 
+  ENFORCE_ADDING_FILES:  
+    description: 'If set to true OctoPackEnforceAddingFiles flag will be added to build command'
+    required: false
   DEPLOY_TO:  
     description: 'If set, Octopus will attempt to auomtatically deploy to this environment'
     required: false
@@ -20,10 +23,10 @@ inputs:
     description: 'The Octopus project to deploy to, if omitted repo name is used instead'
     required: false
   CONFIGURATION:  
-    description: 'The build configuration to use, if unset, defaults to RELEASE'
+    description: 'If set a configuration flag will be added to the build command'
     required: false
   MS_TEAMS_WEBHOOK:  
-    description: 'If set, A MS Teams notification will be sent to this webhook'
+    description: 'If set, a MS Teams notification will be sent to this webhook'
     required: false
 runs:
   using: "node12"

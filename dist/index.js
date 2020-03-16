@@ -4038,13 +4038,15 @@ function main() {
             const octopusUrl = core.getInput("OCTOPUS_URL", { required: false });
             const octopusApiKey = core.getInput("OCTOPUS_APIKEY", { required: false });
             const solutionFile = core.getInput("SOLUTION_FILE", { required: true });
+            const enforceAddingFilesInput = core.getInput("ENFORCE_ADDING_FILES", { required: false });
             const project = core.getInput("PROJECT", { required: false });
             const configurationInput = core.getInput("CONFIGURATION", { required: false });
             const deployTo = core.getInput("DEPLOY_TO", { required: false });
             const msTeamsWebhook = core.getInput("MS_TEAMS_WEBHOOK", { required: false });
             const context = github.context;
             const repo = context.repo.repo;
-            const configuration = configurationInput ? configurationInput : "Release";
+            const configurationFlag = configurationInput ? `/p:Configuration=${configurationInput}` : "";
+            const enforceAddingFilesFlag = (enforceAddingFilesInput.toLowerCase() === "true") ? "/p:OctoPackEnforceAddingFiles=true" : "";
             const projectName = project ? project : repo;
             const createRelease = (createReleaseInput.toLowerCase() === "true");
             if (createRelease && (!octopusUrl || !octopusApiKey)) {
@@ -4059,7 +4061,7 @@ function main() {
                 }
                 const version = context.ref.replace("refs/tags/", "");
                 core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
-                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=${configuration} /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
+                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} ${configurationFlag} ${enforceAddingFilesFlag} /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
                 core.info("Installing octopus cli...");
                 yield exec_1.exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
                 core.info("Creating Release...");
@@ -4070,7 +4072,7 @@ function main() {
                 }
             }
             else { // Otherwise, just build and test
-                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} /p:Configuration=${configuration}`);
+                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} ${configurationFlag} ${enforceAddingFilesFlag}`);
             }
             core.info("✅ complete");
         }
