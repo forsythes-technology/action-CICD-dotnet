@@ -10,13 +10,12 @@ This action creates an Octopus Release given a DotNet Framework solution.
 - uses: forsythes-technology/action-octopus-deploy-dotnet@master
       with: 
 	  	CREATE_RELEASE: true # If set to 'true' the package will be deployed to octopus and a release will be created.
-        SOLUTION_FILE: example.sln 
         OCTOPUS_URL: ${{secrets.OCTOPUS_URL}} # Optional
         OCTOPUS_APIKEY: ${{secrets.OCTOPUS_APIKEY}} # Optional
+        SOLUTION_FILE: example.sln 
+		ENFORCE_ADDING_FILES: true # Optional, If set to true OctoPackEnforceAddingFiles flag will be added to build command
 		DEPLOY_TO: Staging # Optional, if included the release will be deployed to this environment automatically
         PROJECT: Example-Project # Optional, if omitted repo name is used instead
-		CONFIGURATION: Release # Optional, the configuration to use when building the solution if unset, defaults to Release.
-    description: 'The build configuration to use, if unset, defaults to RELEASE'
-    required: false
-        MS_TEAMS_WEBHOOK: <webhook_url> # Optional
+		CONFIGURATION: Release # Optional, If set a configuration flag will be added to the build command defaults to Release.
+		MS_TEAMS_WEBHOOK: <url>  # Optional, If set a MS Teams notification will be sent to this webhook
 ```
