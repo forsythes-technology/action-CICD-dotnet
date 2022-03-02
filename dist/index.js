@@ -4027,10 +4027,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __webpack_require__(747);
 const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
 const github = __importStar(__webpack_require__(469));
 const sendNotification_1 = __webpack_require__(298);
+function getMSBuildPath() {
+    const msBuild2019Path = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe';
+    if (fs.existsSync(msBuild2019Path)) {
+        return msBuild2019Path;
+    }
+    // 
+    const msBuild2022Path = 'C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\bin\\MSBuild.exe';
+    if (fs.existsSync(msBuild2022Path)) {
+        return msBuild2022Path;
+    }
+    // 
+    throw 'Could not find MSBuild.exe';
+}
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -4055,13 +4069,14 @@ function main() {
             core.info("NuGet Restore...");
             yield exec_1.exec(`nuget restore`);
             core.info(`Building solution (ref: ${context.ref})...`);
+            const msBuildPath = getMSBuildPath();
             if (createRelease) { // Build, pack and release
                 if (context.ref.indexOf("refs/tags/") === -1) {
                     throw new Error("Unable to get a version number");
                 }
                 const version = context.ref.replace("refs/tags/", "");
                 core.info(`🐙 Deploying project ${projectName} (Version ${version}) to Octopus `);
-                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} ${configurationFlag} ${enforceAddingFilesFlag} /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
+                yield exec_1.exec(`"${msBuildPath}" ${solutionFile} ${configurationFlag} ${enforceAddingFilesFlag} /p:RunOctoPack=true  /p:OctoPackPackageVersion=${version} /p:OctoPackPublishPackageToHttp=${octopusUrl}/nuget/packages /p:OctoPackPublishApiKey=${octopusApiKey}`);
                 core.info("Installing octopus cli...");
                 yield exec_1.exec(`dotnet tool install octopus.dotnet.cli --tool-path .`);
                 core.info("Creating Release...");
@@ -4072,7 +4087,7 @@ function main() {
                 }
             }
             else { // Otherwise, just build and test
-                yield exec_1.exec(`"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe" ${solutionFile} ${configurationFlag} ${enforceAddingFilesFlag}`);
+                yield exec_1.exec(`"${msBuildPath}" ${solutionFile} ${configurationFlag} ${enforceAddingFilesFlag}`);
             }
             core.info("✅ complete");
         }
