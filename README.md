@@ -6,7 +6,7 @@ This action creates an Octopus Release given a DotNet Framework solution.
 ```
 
 - uses: actions/checkout@v1
-- uses: nuget/setup-nuget@v1.0.2
+- uses: nuget/setup-nuget@v1
 - uses: forsythes-technology/action-octopus-deploy-dotnet@master
       with: 
 	  	CREATE_RELEASE: true # If set to 'true' the package will be deployed to octopus and a release will be created.
